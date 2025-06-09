@@ -1,0 +1,133 @@
+1. Singleton pattern:
+have one instance of a class for the whole application, it is better implemented using the module-based varible approach
+But singletons are usually considered an antipattern in JS, as in JS we can directly create an object. 
+Also generally singleton patterns are used as global variables hence polluting the global namespace.
+
+2. Proxy pattern:
+to get more control over the interactions with certain objects, instead of interacting with it direcrtly we interact with it using a proxy object. this can be used to add validations before modifying the objects properties.
+JS also provided a built-in object Reflect, which makes it easier to manipulate the target object. So instead of accessing properties with obj[prop] or setting properties with obj[prop]=value, we can do so with reflect.get() and reflect.set(), this take the same  paramteres as the  handler object functions.
+Proxy are a powerful way to add control over the behavior of the object, it can help with validation, formatting, notifications, or debugging. but overusing the proxies or performing heavy calculations on each handler method can affect performance as these get invokes everytime we access the properties, so its best not to use proxies for performance critical code.
+
+3. Provider pattern:
+React's solution to the problem of props drilling
+react gives context object using which we can create a Provider component, and then wrap all the components that need the data with the Provider component, Provider component acts as a HOC. In this way we can share a common piece of data across a subtree of components.
+All the components that consume the context re-renders whenever any of the property in value object changes, which can cause performance issues in larger applications, we can mitigate it by using multiple contexts.
+
+4. Prototype pattern:
+JS fundamental prototype inheritance mechanism. When you define methods directly inside a class, those methods arent copied to each class instance, rather they are stored into the class prototype object. When we try to access those methods, JS looks for that method in the class, doesn;t find it, and then looks for it in the prototype object (prototype chain). Prototype object too have a prototype, so if that method isnt there in the first level prototype, it will move on the second level prototype.
+So all instances share a single copy of the method on the prototype, that saves memory. It avoid duplicating methods on every object instance.
+we can create a new object, using an existing object as the prototype, using the Object.create() static method.
+
+5. Observers pattern:
+We have two objects, observable and observers, Observers subscribe to observerables, and whenever any event occurs, the observables notifies the observers. one-to-many data binding
+Observables -----------------> Observers.
+Observables should have following properties:
+1. List of observers
+2. method to subscribe to the observables : subscribe()
+3. Method to unsubscribe to the observable: unsubscribe()
+4. method to notify the observers whenever any event occurs : notify()
+
+Observers are usually callbacks, functions that execute in response to the event notified by the observable.
+Observer pattern is useful when working with asynchronous, event-based data. When we want certain components to get notifies whenever certain data has finished loading, or whenver user sents new message to the message board and all the other members need to be notified.
+Observer pattern is great for separation of concerns and SRP.The observers arent tightly coupled to the observable. Observable is responsible for monitoring, observers are responsible for handling the received data.
+But if observer becomes too complex, it may cause performance issues when notifying all the subscribers. Also it can lead to memory leak if unnecessary observers arent unsubcribed
+Observer pattern can be combined with factory pattern to create Observers or with singleton pattern to ensure that only one instance of the Subject(publisher) exists.
+observer pattern differs from the Publisher-Subscriber pattern which uses a channel in between.
+
+Characteristics:
+1. Observers must resiter themselves with the subject. The subject knows about the observers and directly notifies them.
+2. Things are simple as there is no decoupling via event channels. Prefer for one-to-many relationships
+3. used in Java Swing, UI components subscribe to the data models, used in MVC patterns
+
+6. Publisher-Subscriber pattern:
+Instead of observer directly subscribing to the observable they instead subscribe to the event bus (to a particular topic).Thereforre its aa bit complex than the classic observer pattern.
+There can be multiple publishers, each pushing to the event bus (under different topics).
+the publishers doesnt need to know anything about the subscribers as there is a loose coupling between the subscriber and publisher due to the event bus, also we can have multiple event types, and subscribers can subscribe to only the events they want to listen.
+
+Use Observer when you want direct, tight coupling between subject and observers.
+Use Pub-Sub when you want loose coupling and event-based communication.
+
+Characteristics:
+1. Senders emit messages on a channel/topic, and listeners subscribe to those channels.
+2. Senders and listeners are decoupled, they have no knowledge of each other. Comunication happens through the common event bus.
+3. Prefer for many-to-many relationshipes, this is scalable, flexible and distributed.
+4. Used in messaging systems like RabbitMQ, Apache kafka for inter-service communication in microservices arcitecture, used in event buses in frontend frameworks like Vue.js.
+5. Potential for orphaned events, harder to debug, harder to handle errors as publishers is unaware of subscriber failures.
+
+when to use pub-sub and when to use the classic observer pattern
+
+7. Module pattern:
+Before the introduction of modules in JS, any variables defined at the top level in a file used to pollute the global namespace (they used to get added to the window object), leading to name collistions and overwritting.
+this was mitigated using the IIFEs to create a local scope.
+
+ES2015 introduced modules, a module is a simple file containing the JS code, but the JS engine executes those modules in its own module scope. All modules imports in both commonJS and ES6 are cached by default.
+Variables, functions, classes declared in the module are not added to the global scope, only what explicitly exported is made available to other modules.
+We can have 2 types of export- named and default.
+we can have only one default export per file, and while importing it in another module, we can name it another name, since JS knows that this value is always the value that ewas exported by default. Also we dont need to use {}.
+We have to use {} while importing named exports. We can also give them alias while importing using `as` keyword.
+Dynamic imports: all imported modules are loaded before the rest of file, but in some cases we might only need to load a module based on a certain condition. By dynamically importing modules, we can reduce the page load time. We only have to load, parse, and compile the code that the user really needs, when the user needs it.
+dynamic import() syntax returns promise, while being used at the top level of file (static import) it doesnt return promise.
+Dynamic imports vs static imports.
+By default all statically imported modules get added to the initial bundle, which can affect the initial load time.
+
+8. Mixin pattern:
+Mixins are used to add functionality to classes without using the inheritance by injecting functionality into the object's prototype. We cant use mixins on their own, their sole purpose is to add functionality to other classes/objects.
+Mixins in themselves can use inheritance though. We use mixins using the Object.assign().
+Mixins lets you compose behaviors from multiple sources.
+But, Modifying an objectâ€™s prototype is seen as bad practice, as it can lead to prototype pollution and a level of uncertainty regarding the origin of our functions.
+conflicts can arise in mixins if they share the same functions, in which case we can define our custom function to check and merge the objects instead of usinig Object.assign()
+
+Mixin vs inheritance:
+In JS, there is a lack of multiple inheritance, to tackle this we can use mixins. Thus we can avoid awkward and complex inheritance chains and heirarchy.
+
+9. Mediator/middleware pattern:
+The mediator pattern makes it possible for many components to interact with each other through a central point instead of directly, in which case it any be chaotic.
+The mediator pattern makes it easy for us to simplify the many to many relationships between objects, by letting all the communications flow through a central point.
+It decouples the components from each other. becoming a central pub for peer communication.
+example: a chatroom
+
+Middleware pattern is about processing a request or data through a series of functions, each being able to modify, act on, or halt the flow, before it reaches its destination. It is linear and ordered. Middleware pattern is best when you need to apply a series of functions to an input in a specific sequence
+It decouples the processing steps.
+input ----> Middleware1 -----> middleware2 ----> middleware3 -----> response
+Though if there are a lot of functions it can lead to a large latency
+example: in a webserver, a request goes through a logging middleware, authentication middleware, and then finally to the handler.
+
+10. Flyweight pattern:
+Flyweight pattern is useful when we want to create a large number of similar objects, using this pattern we can have less instances of the class.
+Reduce memory usage by sharing common parts (not copies) of state between multiple objects, instead of storing all data in each object.
+Key Concept: Separate object state into:
+	Intrinsic state: Shared, invariant data (can be reused).
+	Extrinsic state: Unique, context-specific data (supplied externally).
+Real-World Example: Character Formatting in a Text Editor
+Imagine a text editor where each character on the screen is an object. If you store font, size, color, etc., in every character object, memory usage explodes for large documents. Instead, you can share formatting objects (the flyweights) among characters with the same style.
+
+
+11. Factory pattern: Factory pattern is used for creation of customised objects, which might involve keys supplied during RTE. we can also create objects using the classes, and in some scenarios they are better because of prototype sharing which is more memory efficient. Whereas in factory pattern, same functions are dedicated to each objects individually. Classes also have private fields avoiding those fields to be directly acceessible from outside. In functional factory pattern, this can be achieved using the closures.
+Factory patterns are a functional way of creating objects which is more aligned to reactJS (functional and declarative paradigms).
+But classes have an edge when it comes to memory efficieny.
+Factory pattern offers dynamic composition, avoiding complex inheritance or mixins patterns.
+So, use classes for performance, structure and OOPS.
+use factory patterns for flexibility, composability and functional approach.
+real world example: Suppose you’re building a system that sends notifications to users. The type of notification (Email, SMS, Push) may vary based on user preferences or context. Using the factory pattern, you can encapsulate the creation logic and easily add new notification types in the future
+
+12. Dependency injection: 
+
+
+13. Command pattern: The command pattern allows us to decouple methods from the object that executes the operation. It gives you more control if you’re dealing with commands that have a certain lifespan, or commands that should be queued and executed at specific times.
+Problems while not using the command pattern:
+1. tight coupling between methods and class: if we want to add any new method we would have to modify the main class.
+2. No undo/redo operation
+3. limited logging/queing up operations
+
+Command pattern encapsulates each action into command objects/interface, having a execute function and undo method. Each command object has a reference to the receiver and any args it should receive.
+The main class(invoker) is now executes the command, it doesnt need to know how the command is executed.
+We can create decoupled concrete command objects and handle them to the invoker.
+Advantages of using command pattern:
+1. A command object wraps all the info needed to perform an action into a single Command object, so we dont have to remember what parameters and logic are needed for each action.
+2. All commmand objects have the same interface, so we can easily store them in an array(for history, redo, batching), loop them over.
+(ask AI to give the example in vsCode without the command pattern and see the complexity, all the funcitons are tightly coupled to the class, and to each other, by command pattern we are able to decouple them.)
+But using the command pattern can add quite a bit of boilerplate code and complexity to your applications, so if you are sure your class interface wont be changing frequently we can avoid using the command pattern for simplicity.
+
+
+
+14. Facade patetrm: a higher level abstraction on top a function where we pass more config to the HOF.
